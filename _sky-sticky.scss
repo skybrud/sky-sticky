@@ -1,0 +1,25 @@
+[sky-sticky] {
+	&.stick {
+		position:fixed;
+		z-index:10;
+		top:0;
+
+		[ng-transclude] {
+			position:fixed;
+			top:0;
+			width:100%;
+			height:100%;
+			background:inherit;
+			padding:inherit;
+			z-index:10;
+		}
+
+		& + .ghost {
+			display:block;
+		}
+	}
+
+	& + .ghost {
+		display:none;
+	}
+}
