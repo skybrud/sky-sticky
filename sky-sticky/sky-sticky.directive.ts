@@ -61,7 +61,7 @@
 			function calculate() {
 				sticky = false;
 				element.removeClass('stick');
-				TweenLite.set([element[0], _ghost, _content], {clearProps:'all'});
+				TweenLite.set([_element, _ghost, _content], {clearProps:'all'});
 
 				styles = window.getComputedStyle(_element);
 			}
