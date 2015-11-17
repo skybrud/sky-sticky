@@ -1,3 +1,7 @@
+[sky-sticky-contain] {
+	position:relative;
+}
+
 [sky-sticky] {
 	&.stick {
 		position:fixed;
@@ -13,6 +17,17 @@
 			padding:inherit;
 			z-index:10;
 		}
+
+		& + .ghost {
+			display:block;
+		}
+	}
+
+	&.contain {
+		position:absolute;
+		left:0 !important;
+		top:auto !important;
+		bottom:0;
 
 		& + .ghost {
 			display:block;

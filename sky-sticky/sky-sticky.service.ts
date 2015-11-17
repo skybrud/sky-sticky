@@ -10,6 +10,8 @@
 
 		var offsets = [];
 
+		var debounce;
+
 		this.removeOffset = (element) => {
 			var node = element.length ? element[0] : element;
 
@@ -29,15 +31,22 @@
 				if(offset.node == node) {
 					offset.offset = value || 0;
 					found = true;
-
-				} else {
-					skyVisible.checkViews(offset.node, false);
 				}
 			});
 
 			if(!found) {
 				addElement(element, value);
 			}
+
+			clearTimeout(debounce);
+			debounce = setTimeout(() => {
+				for(var i = 0; i < offsets.length; i++) {
+					if(element == offsets[i].node) {
+						break;
+					}
+					skyVisible.checkViews(offsets[i].node, false);
+				}
+			});
 		};
 
 		this.getOffset = (element?) => {

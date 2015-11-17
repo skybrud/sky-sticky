@@ -10,19 +10,22 @@
         return {
             restrict: 'A',
             transclude: true,
+            require: '?^skyStickyContain',
             template: '<div ng-transclude></div>',
             link: link
         };
-        function link(scope, element) {
+        function link(scope, element, attrs, skyStickyContain) {
             var _element = element[0];
             var _content = _element.children[0];
             var _ghost = document.createElement('div');
             var sticky = false;
             var styles;
+            var containCtrl = skyStickyContain ? skyStickyContain : null;
             _ghost.classList.add('ghost');
             element.after(_ghost);
             skyVisible.bind(_element, { recalculate: calculate, cache: false }, function (values, dimensions, scroll) {
                 var offset = skySticky.getOffset(_element);
+                var diff = 0;
                 if (dimensions.top - offset <= scroll.y) {
                     if (!sticky) {
                         sticky = true;
@@ -42,6 +45,18 @@
                         width: dimensions.width,
                         height: dimensions.height,
                     });
+                    if (containCtrl) {
+                        if (containCtrl.dimensions.height + containCtrl.dimensions.top < offset + dimensions.height + scroll.y) {
+                            diff = Math.max(dimensions.height + (containCtrl.dimensions.height + containCtrl.dimensions.top) - (offset + dimensions.height + scroll.y), 0);
+                            skySticky.setOffset(_element, diff);
+                            element.addClass('contain');
+                            element.removeClass('stick');
+                        }
+                        else {
+                            element.removeClass('contain');
+                            element.addClass('stick');
+                        }
+                    }
                 }
                 else if (dimensions.top + dimensions.height >= scroll.y) {
                     if (sticky) {
@@ -55,7 +70,7 @@
             function calculate() {
                 sticky = false;
                 element.removeClass('stick');
-                TweenLite.set([element[0], _ghost, _content], { clearProps: 'all' });
+                TweenLite.set([_element, _ghost, _content], { clearProps: 'all' });
                 styles = window.getComputedStyle(_element);
             }
         }
@@ -68,6 +83,7 @@
     function skyStickyService(skyVisible) {
         var _this = this;
         var offsets = [];
+        var debounce;
         this.removeOffset = function (element) {
             var node = element.length ? element[0] : element;
             for (var i = 0; i < offsets.length; i++) {
@@ -85,13 +101,19 @@
                     offset.offset = value || 0;
                     found = true;
                 }
-                else {
-                    skyVisible.checkViews(offset.node, false);
-                }
             });
             if (!found) {
                 addElement(element, value);
             }
+            clearTimeout(debounce);
+            debounce = setTimeout(function () {
+                for (var i = 0; i < offsets.length; i++) {
+                    if (element == offsets[i].node) {
+                        break;
+                    }
+                    skyVisible.checkViews(offsets[i].node, false);
+                }
+            });
         };
         this.getOffset = function (element) {
             var node = !element ? false : element.length ? element[0] : element;
